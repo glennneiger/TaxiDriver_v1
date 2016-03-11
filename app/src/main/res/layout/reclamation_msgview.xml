@@ -23,13 +23,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxEms="12"
-            android:textColor="@color/blue"
+            android:textColor="@color/red"
             android:layout_gravity="center"
             android:textSize="10dp"/>
 
         <View
             android:layout_width="fill_parent"
             android:layout_height="2dp"
-            android:background="@color/blue"/>
+            android:background="@color/red"/>
     </LinearLayout>
 </LinearLayout>

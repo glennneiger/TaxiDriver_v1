@@ -19,8 +19,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import it.mahd.taxidriver.activity.Book;
 import it.mahd.taxidriver.activity.BookAdvance;
-import it.mahd.taxidriver.activity.BookNow;
 import it.mahd.taxidriver.activity.Home;
 import it.mahd.taxidriver.activity.Login;
 import it.mahd.taxidriver.activity.Profile;
@@ -101,7 +101,7 @@ public class Main extends AppCompatActivity implements FragmentDrawer.FragmentDr
                 title = getString(R.string.home);
                 break;
             case 1:
-                fragment = new BookNow();
+                fragment = new Book();
                 title = getString(R.string.now);
                 break;
             case 2:

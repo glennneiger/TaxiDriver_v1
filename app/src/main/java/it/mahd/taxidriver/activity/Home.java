@@ -45,7 +45,7 @@ public class Home extends Fragment {
             public void onClick(View v) {
                 //return commantre annd delete this
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.container_body, new BookNow());
+                ft.replace(R.id.container_body, new Book());
                 ft.addToBackStack(null);
                 ft.commit();
                 ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.now));
@@ -57,7 +57,7 @@ public class Home extends Fragment {
                     ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.login));
                 }else{
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
-                    ft.replace(R.id.container_body, new BookNow());
+                    ft.replace(R.id.container_body, new Book());
                     ft.addToBackStack(null);
                     ft.commit();
                     ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.now));

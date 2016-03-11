@@ -51,7 +51,7 @@ import it.mahd.taxidriver.util.Encrypt;
 import it.mahd.taxidriver.util.ServerRequest;
 
 /**
- * Created by salem on 2/13/16.
+ * Created by salem on 3/13/16.
  */
 public class SignUp extends Fragment {
     SharedPreferences pref;
@@ -287,7 +287,7 @@ public class SignUp extends Fragment {
                 e.printStackTrace();
             }
         }else{
-            Toast.makeText(getActivity(),"App server is unavailable!",Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), R.string.serverunvalid,Toast.LENGTH_LONG).show();
         }
     }
 

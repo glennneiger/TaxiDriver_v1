@@ -57,7 +57,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/send"
-                    android:background="@color/blue"
+                    android:background="@color/red"
                     android:layout_marginTop="40dp"
                     android:textColor="@android:color/white"/>
             </LinearLayout>

@@ -42,7 +42,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/login"
-            android:background="@color/blue"
+            android:background="@color/red"
             android:layout_marginTop="40dp"
             android:textColor="@android:color/white"/>
 
@@ -54,7 +54,7 @@
             android:background="@null"
             android:text="@string/sign_up_link"
             android:textAllCaps="false"
-            android:textColor="@color/blue"
+            android:textColor="@color/red"
             android:textSize="15sp" />
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

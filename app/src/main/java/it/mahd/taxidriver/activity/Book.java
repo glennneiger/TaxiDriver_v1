@@ -24,13 +24,13 @@ import it.mahd.taxidriver.util.GPSTracker;
 /**
  * Created by salem on 2/13/16.
  */
-public class BookNow extends Fragment {
+public class Book extends Fragment {
     GPSTracker gps;
     MapView mMapView;
     private GoogleMap googleMap;
     double latitude, longitude;
 
-    public BookNow() {}
+    public Book() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,7 @@ public class BookNow extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.booknow, container, false);
+        View v = inflater.inflate(R.layout.book, container, false);
         mMapView = (MapView) v.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
@@ -52,7 +52,7 @@ public class BookNow extends Fragment {
 
         googleMap = mMapView.getMap();
         googleMap.setMyLocationEnabled(true);
-        gps = new GPSTracker(BookNow.this.getActivity());
+        gps = new GPSTracker(Book.this.getActivity());
         if(gps.canGetLocation()){
             latitude = gps.getLatitude();
             longitude = gps.getLongitude();
