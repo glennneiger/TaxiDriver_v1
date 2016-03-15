@@ -10,66 +10,30 @@
         android:layout_height="match_parent"
         class="com.google.android.gms.maps.SupportMapFragment" />
 
-    <HorizontalScrollView
-        android:layout_width="fill_parent"
+    <ScrollView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="10dp">
+        android:layout_alignParentLeft="true"
+        android:layout_gravity="center"
+        android:layout_margin="5dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center">
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_centerVertical="true">
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/pocwsition_btn"
+                android:id="@+id/start_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_dialog_map" />
+                android:src="@android:drawable/ic_media_play"/>
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/posixxtion_btn"
+                android:id="@+id/pause_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_dialog_map" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/position_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_dialog_map" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/posiqstion_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_dialog_map" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/posisdtion_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_dialog_map" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/positdfgion_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_dialog_map" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/positifgdon_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_dialog_map" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/positsqion_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_dialog_map" />
+                android:src="@android:drawable/ic_media_pause"/>
         </LinearLayout>
-    </HorizontalScrollView>
+    </ScrollView>
 </RelativeLayout>
