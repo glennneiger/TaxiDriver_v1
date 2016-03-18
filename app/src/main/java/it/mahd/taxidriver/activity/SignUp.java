@@ -165,6 +165,7 @@ public class SignUp extends Fragment {
             }
         });
 
+        Gender_sp.setSelection(1);
         Gender_sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -260,6 +261,7 @@ public class SignUp extends Fragment {
         int x = algo.keyVirtual();
         String key = algo.key(x);
         List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("app", algo.dec2enc(conf.app, key)));
         params.add(new BasicNameValuePair(conf.tag_fname, algo.dec2enc(Fname_etxt.getText().toString(), key)));
         params.add(new BasicNameValuePair(conf.tag_lname, algo.dec2enc(Lname_etxt.getText().toString(), key)));
         params.add(new BasicNameValuePair(conf.tag_gender, algo.dec2enc(Gender_sp.getSelectedItem().toString(), key)));

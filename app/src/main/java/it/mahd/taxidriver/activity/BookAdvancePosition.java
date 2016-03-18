@@ -24,14 +24,12 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import it.mahd.taxidriver.Main;
 import it.mahd.taxidriver.R;
 import it.mahd.taxidriver.util.Controllers;
-import it.mahd.taxidriver.util.GPSTracker;
 
 /**
  * Created by salem on 3/2/16.
  */
 public class BookAdvancePosition extends Fragment {
     Controllers conf = new Controllers();
-    GPSTracker gps;
     MapView mMapView;
     private GoogleMap googleMap;
     double latitude, longitude;
@@ -63,8 +61,7 @@ public class BookAdvancePosition extends Fragment {
         /*googleMap.setOnMarkerDragListener(this);
         googleMap.setOnMapLongClickListener(this);
         googleMap.setOnMapClickListener(this);*/
-        gps = new GPSTracker(BookAdvancePosition.this.getActivity());
-        if(gps.canGetLocation()){
+        /*if(gps.canGetLocation()){
             latitude = gps.getLatitude();
             longitude = gps.getLongitude();
             Toast.makeText(getActivity(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
@@ -72,7 +69,7 @@ public class BookAdvancePosition extends Fragment {
             gps.showSettingsAlert();
             latitude = 0;
             longitude = 0;
-        }
+        }*/
         /*MarkerOptions marker = new MarkerOptions().position(new LatLng(latitude, longitude)).title("Hello Maps");// create marker
         marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));// Changing marker icon
         googleMap.addMarker(marker);// adding marker*/
