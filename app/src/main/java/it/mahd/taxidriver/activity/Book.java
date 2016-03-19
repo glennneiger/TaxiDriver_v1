@@ -18,6 +18,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
@@ -60,34 +61,15 @@ public class Book extends Fragment implements LocationListener {
     boolean canGetLocation = false;// flag for GPS status
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 3;// The minimum distance to change Updates in meters // 3 meters
     private static final long MIN_TIME_BW_UPDATES = 1000 * 3 * 1;// The minimum time between updates in milliseconds // 3 seconds
+    private FloatingActionButton Start_btn, Pause_btn;
 
     public Book() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*
-        socket.on("message", handleIncomingMessages);*/
     }
 
-    private Emitter.Listener handleIncomingMessages = new Emitter.Listener(){
-        public void call(final Object... args){
-            getActivity().runOnUiThread(new Runnable() {
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String message;
-                    String imageText;
-                    try {
-                        message = data.getString("text").toString();
-                        //addMessage(message);
-
-                    } catch (JSONException e) {
-                        // return;
-                    }
-                }
-            });
-        }
-    };
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.book, container, false);
@@ -116,20 +98,38 @@ public class Book extends Fragment implements LocationListener {
             latitude = 0;
             longitude = 0;
         }
-        /*MarkerOptions marker = new MarkerOptions().position(new LatLng(latitude, longitude)).title("Hello Maps");// create marker
-        marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));// Changing marker icon
-        googleMap.addMarker(marker);// adding marker*/
         cameraPosition = new CameraPosition.Builder().target(new LatLng(latitude, longitude)).zoom(15).build();
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
-        FloatingActionButton Start_btn = (FloatingActionButton) v.findViewById(R.id.start_btn);
+        Start_btn = (FloatingActionButton) v.findViewById(R.id.start_btn);
         Start_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 isStart = true;
+                sendToServer(latitude, latitude, isStart);
+            }
+        });
+
+        Pause_btn = (FloatingActionButton) v.findViewById(R.id.pause_btn);
+        Pause_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isStart = false;
+                sendToServer(0, 0, isStart);
             }
         });
         return v;
+    }
+
+    private void sendToServer(double lat, double lon, boolean work) {
+        JSONObject json = new JSONObject();
+        try{
+            json.put(conf.tag_latitude,lat);
+            json.put(conf.tag_longitude, lon);
+            json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
+            json.put(conf.tag_working, work);
+            socket.emit(conf.tag_gps, json);
+        }catch(JSONException e){ }
     }
 
     public Location getLocation() {
@@ -234,13 +234,7 @@ public class Book extends Fragment implements LocationListener {
     }
     private void changeLocation() {
         if (isStart) {
-            JSONObject json = new JSONObject();
-            try{
-                json.put(conf.tag_latitude,latitude);
-                json.put(conf.tag_longitude, longitude);
-                json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
-                socket.emit(conf.tag_gps, json);
-            }catch(JSONException e){ }
+            sendToServer(latitude, latitude, isStart);
         }
     }
 
@@ -274,6 +268,7 @@ public class Book extends Fragment implements LocationListener {
     public void onDestroy() {
         super.onDestroy();
         stopUsingGPS();
+        socket.disconnect();
         mMapView.onDestroy();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.container_body, new Home());
