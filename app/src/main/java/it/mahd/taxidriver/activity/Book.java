@@ -106,7 +106,7 @@ public class Book extends Fragment implements LocationListener {
             @Override
             public void onClick(View view) {
                 isStart = true;
-                sendToServer(latitude, latitude, isStart);
+                sendToServer(latitude, longitude, isStart);
             }
         });
 
@@ -234,7 +234,7 @@ public class Book extends Fragment implements LocationListener {
     }
     private void changeLocation() {
         if (isStart) {
-            sendToServer(latitude, latitude, isStart);
+            sendToServer(latitude, longitude, isStart);
         }
     }
 
@@ -266,7 +266,7 @@ public class Book extends Fragment implements LocationListener {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+        sendToServer(latitude, longitude, false);
         stopUsingGPS();
         socket.disconnect();
         mMapView.onDestroy();
@@ -275,6 +275,7 @@ public class Book extends Fragment implements LocationListener {
         ft.addToBackStack(null);
         ft.commit();
         ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.home));
+        super.onDestroy();
     }
 
     @Override
