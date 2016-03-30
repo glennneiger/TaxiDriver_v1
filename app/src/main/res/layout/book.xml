@@ -44,6 +44,22 @@
                 android:layout_gravity="center"
                 android:padding="2dp"
                 android:src="@android:drawable/ic_media_pause"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/course_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="2dp"
+                android:src="@android:drawable/ic_input_add"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/valid_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="2dp"
+                android:src="@android:drawable/ic_menu_agenda"/>
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

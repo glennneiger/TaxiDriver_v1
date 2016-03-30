@@ -28,6 +28,8 @@ public class Controllers {
 
     public static final String tag_key = "key";
     public static final String tag_id = "_id";
+    public static final String tag_tokenDriver = "tokenDriver";
+    public static final String tag_tokenClient = "tokenClient";
     public static final String tag_token = "token";
     public static final String tag_username = "username";
     public static final String tag_name = "name";
@@ -57,8 +59,24 @@ public class Controllers {
     public static final String tag_sat = "sat";
     public static final String tag_sun = "sun";
     public static final String tag_description = "description";
-    public static final String tag_gps = "gps";
     public static final String tag_working = "working";
+    public static final String tag_originLatitude = "originLatitude";
+    public static final String tag_originLongitude = "originLongitude";
+    public static final String tag_desLatitude = "desLatitude";
+    public static final String tag_desLongitude = "desLongitude";
+    public static final String tag_validRoute = "validRoute";
+    public static final String tag_pcourse = "pcourse";
+    public static final String tag_ptake = "ptake";
+    public static final String tag_preturn = "preturn";
+
+    public static final String tag_socket = "socket";
+    public static final String io_gps = "gps";
+    public static final String io_preBook = "preBook";
+    public static final String io_validBook = "validBook";
+    public static final String io_postBook = "postBook";
+    public static final String io_drawRoute = "drawRoute";
+    public static final String io_validRoute = "validRoute";
+    public static final String io_endCourse = "endCourse";
 
     public Controllers() {}
 

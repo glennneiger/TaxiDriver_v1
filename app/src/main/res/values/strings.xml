@@ -46,6 +46,14 @@
     <string name="sun">SUN</string>
     <string name="networkunvalid">Network is unavailable!</string>
     <string name="serverunvalid">Server is unavailable!</string>
+    <string name="book">Book</string>
+    <string name="cancel">Cancel</string>
+    <string name="priceCourse">The amount of the taxi race</string>
+    <string name="priceCourse_err">Enter the amount of the taxi race</string>
+    <string name="priceTake">The amount taked</string>
+    <string name="priceTake_err">Enter the amount taked</string>
+    <string name="priceReturn">The amount returned</string>
+    <string name="priceReturn_err">Enter the amount returned</string>
 
     <string-array name="nav_drawer_labels">
         <item>@string/home</item>

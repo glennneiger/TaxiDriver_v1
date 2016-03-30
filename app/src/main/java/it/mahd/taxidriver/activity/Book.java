@@ -1,14 +1,17 @@
 package it.mahd.taxidriver.activity;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +24,13 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -65,6 +72,8 @@ public class Book extends Fragment implements LocationListener {
 
     MapView mMapView;
     Service service;
+    private static Dialog bookDialog;
+    private static Dialog validDialog;
     private GoogleMap googleMap;
     ArrayList<LatLng> markerPoints;
     protected LocationManager locationManager;// Declaring a Location Manager
@@ -76,10 +85,22 @@ public class Book extends Fragment implements LocationListener {
     boolean isGPSEnabled = false;// flag for GPS status
     boolean isNetworkEnabled = false;// flag for network status
     boolean canGetLocation = false;// flag for GPS status
+    private String tokenOfClient;
+    private boolean ioBook = false;
+    private boolean ioValid = false;
+    private boolean isClick = false;
+    private boolean isRoute = false;
+    private double pcourse;
+    private double ptake;
+    private double preturn;
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 3;// The minimum distance to change Updates in meters // 3 meters
     private static final long MIN_TIME_BW_UPDATES = 1000 * 3 * 1;// The minimum time between updates in milliseconds // 3 seconds
-    private FloatingActionButton Start_btn, Pause_btn;
+    private FloatingActionButton Start_btn, Pause_btn, Course_btn, Valid_btn;
     private TextView DistanceDuration_txt;
+
+    private TextInputLayout PriceCourse_input, PriceTake_input, PriceReturn_input;
+    private EditText PriceCourse_etxt, PriceTake_etxt, PriceReturn_etxt;
+    private Button Send_btn;
 
     public Book() {}
 
@@ -93,6 +114,9 @@ public class Book extends Fragment implements LocationListener {
         View v = inflater.inflate(R.layout.book, container, false);
         pref = getActivity().getSharedPreferences(conf.app, Context.MODE_PRIVATE);
         socket.connect();
+        ioBook = true;
+        socket.on(conf.io_preBook, handleIncomingPreBook);//listen in book now
+        socket.on(conf.io_validRoute, handleIncomingValidRoute);//listen in valid route
 
         mMapView = (MapView) v.findViewById(R.id.mapView);
         DistanceDuration_txt = (TextView) v.findViewById(R.id.distance_time_txt);
@@ -123,35 +147,46 @@ public class Book extends Fragment implements LocationListener {
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             public void onMapClick(LatLng point) {
-                // Already two locations
-                if(markerPoints.size()>1){
-                    markerPoints.clear();
-                    googleMap.clear();
+                if (isClick) {
+                    // Already two locations
+                    if (markerPoints.size() > 1) {
+                        markerPoints.clear();
+                        googleMap.clear();
+                    }
+                    // Adding new item to the ArrayList
+                    markerPoints.add(point);
+                    // Creating MarkerOptions & Setting the position of the marker
+                    MarkerOptions options = new MarkerOptions();
+                    options.position(point);
+                    //For the start location, the color of marker is BLUE and for the end location, the color of marker is RED.
+                    if (markerPoints.size() == 1) {
+                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title("Start");
+                    } else if (markerPoints.size() == 2) {
+                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("End");
+                    }
+                    // Add new marker to the Google Map Android API V2
+                    googleMap.addMarker(options);
+                    // Checks, whether start and end locations are captured
+                    if (markerPoints.size() >= 2) {
+                        LatLng origin = markerPoints.get(0);
+                        LatLng dest = markerPoints.get(1);
+                        // To Client
+                        JSONObject json = new JSONObject();
+                        try{
+                            json.put(conf.tag_originLatitude,origin.latitude);
+                            json.put(conf.tag_originLongitude, origin.longitude);
+                            json.put(conf.tag_desLatitude,dest.latitude);
+                            json.put(conf.tag_desLongitude, dest.longitude);
+                            json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
+                            socket.emit(conf.io_drawRoute, json);
+                        }catch(JSONException e){ }
+                        // Getting URL to the Google Directions API
+                        String url = getDirectionsUrl(origin, dest);
+                        // Start downloading json data from Google Directions API
+                        DownloadTask downloadTask = new DownloadTask();
+                        downloadTask.execute(url);
+                    }
                 }
-                // Adding new item to the ArrayList
-                markerPoints.add(point);
-                // Creating MarkerOptions & Setting the position of the marker
-                MarkerOptions options = new MarkerOptions();
-                options.position(point);
-                //For the start location, the color of marker is BLUE and for the end location, the color of marker is RED.
-                if(markerPoints.size()==1){
-                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                }else if(markerPoints.size()==2){
-                    options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                }
-                // Add new marker to the Google Map Android API V2
-                googleMap.addMarker(options);
-                // Checks, whether start and end locations are captured
-                if(markerPoints.size() >= 2){
-                    LatLng origin = markerPoints.get(0);
-                    LatLng dest = markerPoints.get(1);
-                    // Getting URL to the Google Directions API
-                    String url = getDirectionsUrl(origin, dest);
-                    // Start downloading json data from Google Directions API
-                    DownloadTask downloadTask = new DownloadTask();
-                    downloadTask.execute(url);
-                }
-
             }
         });
 
@@ -172,8 +207,224 @@ public class Book extends Fragment implements LocationListener {
                 sendToServer(0, 0, isStart);
             }
         });
+
+        Course_btn = (FloatingActionButton) v.findViewById(R.id.course_btn);
+        Course_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isStart = false;
+                ioBook = false;
+                sendToServer(0, 0, isStart);
+                if (!isClick)
+                    Toast.makeText(getActivity(), "Other service !!", Toast.LENGTH_SHORT).show();
+                googleMap.clear();
+            }
+        });
+
+        Valid_btn = (FloatingActionButton) v.findViewById(R.id.valid_btn);
+        Valid_btn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                //save book
+                validDialog = new Dialog(getActivity(), R.style.FullHeightDialog);
+                validDialog.setContentView(R.layout.book_dialog_valid);
+                validDialog.setCancelable(true);
+
+                PriceCourse_input = (TextInputLayout) validDialog.findViewById(R.id.input_priceCourse);
+                PriceCourse_etxt = (EditText) validDialog.findViewById(R.id.priceCourse_etxt);
+                PriceTake_input = (TextInputLayout) validDialog.findViewById(R.id.input_priceTake);
+                PriceTake_etxt = (EditText) validDialog.findViewById(R.id.priceTake_etxt);
+                PriceReturn_input = (TextInputLayout) validDialog.findViewById(R.id.input_priceReturn);
+                PriceReturn_etxt = (EditText) validDialog.findViewById(R.id.priceReturn_etxt);
+                Send_btn = (Button) validDialog.findViewById(R.id.send_btn);
+                Send_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(conf.NetworkIsAvailable(getActivity())){
+                            if (!validatePriceCourse()) { return; }
+                            if (!validatePriceTake()) { return; }
+                            if (validatePriceReturn()) {
+                                pcourse = Double.parseDouble(PriceCourse_etxt.getText().toString());
+                                ptake = Double.parseDouble(PriceTake_etxt.getText().toString());
+                                preturn = Double.parseDouble(PriceReturn_etxt.getText().toString());
+                                if (ptake >= pcourse) {
+                                    if (!(preturn == ptake - pcourse)) {
+                                        Toast.makeText(getActivity(), "plz verify u return " + (ptake - pcourse),Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            }
+                            JSONObject json = new JSONObject();
+                            try{
+                                json.put(conf.tag_pcourse, pcourse);
+                                json.put(conf.tag_ptake, ptake);
+                                json.put(conf.tag_preturn, preturn);
+                                json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
+                                socket.emit(conf.io_endCourse, json);
+                            }catch(JSONException e){ }
+                        }else{
+                            Toast.makeText(getActivity(), R.string.networkunvalid, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                PriceCourse_etxt.addTextChangedListener(new MyTextWatcher(PriceCourse_etxt));
+                PriceTake_etxt.addTextChangedListener(new MyTextWatcher(PriceTake_etxt));
+                PriceReturn_etxt.addTextChangedListener(new MyTextWatcher(PriceReturn_etxt));
+            }
+        });
         return v;
     }
+
+    private boolean validatePriceCourse() {
+        if(PriceCourse_etxt.getText().toString().trim().isEmpty()) {
+            PriceCourse_input.setError(getString(R.string.priceCourse_err));
+            requestFocus(PriceCourse_etxt);
+            return false;
+        } else {
+            PriceCourse_input.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    private boolean validatePriceTake() {
+        if(PriceTake_etxt.getText().toString().trim().isEmpty()) {
+            PriceTake_input.setError(getString(R.string.priceTake_err));
+            requestFocus(PriceTake_etxt);
+            return false;
+        } else {
+            PriceTake_input.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    private boolean validatePriceReturn() {
+        if(PriceReturn_etxt.getText().toString().trim().isEmpty()) {
+            PriceReturn_input.setError(getString(R.string.priceReturn_err));
+            requestFocus(PriceReturn_etxt);
+            return false;
+        } else {
+            PriceReturn_input.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    private void requestFocus(View view) {
+        if (view.requestFocus()) {
+            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
+    }
+
+    private class MyTextWatcher implements TextWatcher {
+        private View view;
+        private MyTextWatcher(View view) { this.view = view; }
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        public void afterTextChanged(Editable editable) {
+            switch (view.getId()) {
+                case R.id.priceCourse_etxt:
+                    validatePriceCourse();
+                    break;
+                case R.id.priceTake_etxt:
+                    validatePriceTake();
+                    break;
+                case R.id.priceReturn_etxt:
+                    validatePriceReturn();
+                    break;
+            }
+        }
+    }
+
+    private Emitter.Listener handleIncomingValidRoute = new Emitter.Listener(){
+        public void call(final Object... args){
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    if (isRoute) {
+                        JSONObject data = (JSONObject) args[0];
+                        final String tokenClient;
+                        final Boolean valid;
+                        try {
+                            valid = data.getBoolean(conf.tag_validRoute);
+                            tokenClient = data.getString(conf.tag_tokenClient);
+                            if (valid && tokenClient.equals(tokenOfClient)) isClick = false;
+                        } catch (JSONException e) { }
+                    }
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener handleIncomingPreBook = new Emitter.Listener(){
+        public void call(final Object... args){
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    if (isStart && ioBook) {
+                        ioBook = false;
+                        JSONObject data = (JSONObject) args[0];
+                        final Double lat, lon;
+                        final String token, fname;
+                        try {
+                            lat = data.getDouble(conf.tag_latitude);
+                            lon = data.getDouble(conf.tag_longitude);
+                            token = data.getString(conf.tag_token);
+                            fname = data.getString(conf.tag_fname);
+                            if (token.equals(pref.getString(conf.tag_token, ""))) {
+                                bookDialog = new Dialog(getActivity(), R.style.FullHeightDialog);
+                                bookDialog.setContentView(R.layout.book_dialog);
+                                bookDialog.setCancelable(true);
+                                TextView Username_txt;
+                                Button Book_btn, Cancel_btn;
+                                Username_txt = (TextView) bookDialog.findViewById(R.id.username_txt);
+                                Username_txt.setText(fname);
+                                Book_btn = (Button) bookDialog.findViewById(R.id.book_btn);
+                                Cancel_btn = (Button) bookDialog.findViewById(R.id.cancel_btn);
+
+                                Cancel_btn.setOnClickListener(new View.OnClickListener() {
+                                    public void onClick(View v) {
+                                        bookDialog.dismiss();
+                                        ioBook = true;
+                                    }
+                                });
+                                Book_btn.setOnClickListener(new View.OnClickListener() {
+                                    public void onClick(View v) {
+                                        bookDialog.dismiss();
+                                        isClick = true;
+                                        isRoute = true;
+                                        isStart = false;
+                                        sendToServer(0, 0, isStart);
+                                        googleMap.clear();
+                                        MarkerOptions options = new MarkerOptions();
+                                        LatLng origin = new LatLng(latitude,longitude);
+                                        LatLng dest = new LatLng(lat,lon);
+                                        options.position(dest);
+                                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("Me");
+                                        googleMap.addMarker(options);
+                                        options.position(origin);
+                                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(fname);
+                                        googleMap.addMarker(options);
+                                        String url = getDirectionsUrl(origin, dest);
+                                        DownloadTask downloadTask = new DownloadTask();
+                                        downloadTask.execute(url);
+
+                                        JSONObject jsonx = new JSONObject();
+                                        try{
+                                            jsonx.put(conf.tag_latitude,latitude);
+                                            jsonx.put(conf.tag_longitude, longitude);
+                                            jsonx.put(conf.tag_token, pref.getString(conf.tag_token, ""));
+                                            socket.emit(conf.io_validBook, jsonx);
+                                            ioValid = true;
+                                            isStart = false;
+                                        }catch(JSONException e){ }
+                                    }
+                                });
+                                bookDialog.show();
+                            }
+                        } catch (JSONException e) { }
+                    } else {
+                        ioBook = true;
+                    }
+                }
+            });
+        }
+    };
 
     private String getDirectionsUrl(LatLng origin,LatLng dest){
         // Origin of route
@@ -308,7 +559,7 @@ public class Book extends Fragment implements LocationListener {
             json.put(conf.tag_longitude, lon);
             json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
             json.put(conf.tag_working, work);
-            socket.emit(conf.tag_gps, json);
+            socket.emit(conf.io_gps, json);
         }catch(JSONException e){ }
     }
 
@@ -415,6 +666,15 @@ public class Book extends Fragment implements LocationListener {
     private void changeLocation() {
         if (isStart) {
             sendToServer(latitude, longitude, isStart);
+        }
+        if (ioValid) {
+            JSONObject json = new JSONObject();
+            try{
+                json.put(conf.tag_latitude,latitude);
+                json.put(conf.tag_longitude, longitude);
+                json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
+                socket.emit(conf.io_postBook, json);
+            }catch(JSONException e){ }
         }
     }
 
