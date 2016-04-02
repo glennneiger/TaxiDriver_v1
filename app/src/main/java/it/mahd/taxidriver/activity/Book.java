@@ -283,7 +283,11 @@ public class Book extends Fragment implements LocationListener {
                                             json.put(conf.tag_preturn, preturn);
                                             json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
                                             socket.emit(conf.io_endCourse, json);
+                                            googleMap.clear();
                                             validDialog.dismiss();
+                                            isStart = true; ioBook = true;
+                                            ioValid = false; isClick = false; isRoute = false;
+                                            sendToServer(latitude, longitude, isStart);
                                         } catch (JSONException e) {
                                         }
                                     }
@@ -305,65 +309,6 @@ public class Book extends Fragment implements LocationListener {
             }
         });
         return v;
-    }
-
-    private boolean validatePriceCourse() {
-        if(PriceCourse_etxt.getText().toString().trim().isEmpty()) {
-            PriceCourse_input.setError(getString(R.string.priceCourse_err));
-            requestFocus(PriceCourse_etxt);
-            return false;
-        } else {
-            PriceCourse_input.setErrorEnabled(false);
-        }
-        return true;
-    }
-
-    private boolean validatePriceTake() {
-        if(PriceTake_etxt.getText().toString().trim().isEmpty()) {
-            PriceTake_input.setError(getString(R.string.priceTake_err));
-            requestFocus(PriceTake_etxt);
-            return false;
-        } else {
-            PriceTake_input.setErrorEnabled(false);
-        }
-        return true;
-    }
-
-    private boolean validatePriceReturn() {
-        if(PriceReturn_etxt.getText().toString().trim().isEmpty()) {
-            PriceReturn_input.setError(getString(R.string.priceReturn_err));
-            requestFocus(PriceReturn_etxt);
-            return false;
-        } else {
-            PriceReturn_input.setErrorEnabled(false);
-        }
-        return true;
-    }
-
-    private void requestFocus(View view) {
-        if (view.requestFocus()) {
-            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        }
-    }
-
-    private class MyTextWatcher implements TextWatcher {
-        private View view;
-        private MyTextWatcher(View view) { this.view = view; }
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
-        public void afterTextChanged(Editable editable) {
-            switch (view.getId()) {
-                case R.id.priceCourse_etxt:
-                    validatePriceCourse();
-                    break;
-                case R.id.priceTake_etxt:
-                    validatePriceTake();
-                    break;
-                case R.id.priceReturn_etxt:
-                    validatePriceReturn();
-                    break;
-            }
-        }
     }
 
     private Emitter.Listener handleIncomingValidRoute = new Emitter.Listener(){
@@ -393,13 +338,14 @@ public class Book extends Fragment implements LocationListener {
                         ioBook = false;
                         JSONObject data = (JSONObject) args[0];
                         final Double lat, lon;
-                        final String token, fname;
+                        final String tokenD, tokenC, fname;
                         try {
                             lat = data.getDouble(conf.tag_latitude);
                             lon = data.getDouble(conf.tag_longitude);
-                            token = data.getString(conf.tag_token);
+                            tokenD = data.getString(conf.tag_tokenDriver);
+                            tokenC = data.getString(conf.tag_tokenClient);
                             fname = data.getString(conf.tag_fname);
-                            if (token.equals(pref.getString(conf.tag_token, ""))) {
+                            if (tokenD.equals(pref.getString(conf.tag_token, ""))) {
                                 bookDialog = new Dialog(getActivity(), R.style.FullHeightDialog);
                                 bookDialog.setContentView(R.layout.book_dialog);
                                 bookDialog.setCancelable(true);
@@ -419,6 +365,7 @@ public class Book extends Fragment implements LocationListener {
                                 Book_btn.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
                                         bookDialog.dismiss();
+                                        tokenOfClient = tokenC;
                                         fnameOfClient = fname;
                                         isClick = true;
                                         isRoute = true;
@@ -642,6 +589,65 @@ public class Book extends Fragment implements LocationListener {
             e.printStackTrace();
         }
         return location;
+    }
+
+    private boolean validatePriceCourse() {
+        if(PriceCourse_etxt.getText().toString().trim().isEmpty()) {
+            PriceCourse_input.setError(getString(R.string.priceCourse_err));
+            requestFocus(PriceCourse_etxt);
+            return false;
+        } else {
+            PriceCourse_input.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    private boolean validatePriceTake() {
+        if(PriceTake_etxt.getText().toString().trim().isEmpty()) {
+            PriceTake_input.setError(getString(R.string.priceTake_err));
+            requestFocus(PriceTake_etxt);
+            return false;
+        } else {
+            PriceTake_input.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    private boolean validatePriceReturn() {
+        if(PriceReturn_etxt.getText().toString().trim().isEmpty()) {
+            PriceReturn_input.setError(getString(R.string.priceReturn_err));
+            requestFocus(PriceReturn_etxt);
+            return false;
+        } else {
+            PriceReturn_input.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    private void requestFocus(View view) {
+        if (view.requestFocus()) {
+            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
+    }
+
+    private class MyTextWatcher implements TextWatcher {
+        private View view;
+        private MyTextWatcher(View view) { this.view = view; }
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+        public void afterTextChanged(Editable editable) {
+            switch (view.getId()) {
+                case R.id.priceCourse_etxt:
+                    validatePriceCourse();
+                    break;
+                case R.id.priceTake_etxt:
+                    validatePriceTake();
+                    break;
+                case R.id.priceReturn_etxt:
+                    validatePriceReturn();
+                    break;
+            }
+        }
     }
 
     public void stopUsingGPS(){//Stop using GPS listener & Calling this function will stop using GPS in your app

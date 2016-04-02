@@ -76,6 +76,16 @@
             android:textColor="@color/purpleDeep"
             android:textSize="15sp" />
 
+
+        <RatingBar
+            android:id="@+id/pt_rb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:rating="1.0"
+            android:stepSize="0.1"
+            android:isIndicator="true" />
+
         <Button
             android:id="@+id/logout_btn"
             android:layout_width="wrap_content"

@@ -3,6 +3,9 @@ package it.mahd.taxidriver.activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -45,10 +49,11 @@ public class Profile extends Fragment {
 
     private TextView Username_txt, City_txt, Age_txt, Email_txt, Phone_txt;
     private ImageView Picture_iv;
+    private RatingBar Point_rb;
     private Button Logout_btn;
 
     private String fname, lname, gender, dateN, country, city, email, phone, picture;
-
+    private Float point, pointTotal;
 
     public Profile() {}
 
@@ -94,6 +99,12 @@ public class Profile extends Fragment {
             }
         });
 
+        Point_rb = (RatingBar) rootView.findViewById(R.id.pt_rb);
+        LayerDrawable stars = (LayerDrawable) Point_rb.getProgressDrawable();
+        stars.getDrawable(2).setColorFilter(getResources().getColor(R.color.red), PorterDuff.Mode.SRC_ATOP);
+        stars.getDrawable(1).setColorFilter(getResources().getColor(R.color.red), PorterDuff.Mode.SRC_ATOP);
+        stars.getDrawable(0).setColorFilter(getResources().getColor(R.color.red), PorterDuff.Mode.SRC_ATOP);
+
         Picture_iv = (ImageView) rootView.findViewById(R.id.picture_iv);
 
         Logout_btn = (Button) rootView.findViewById(R.id.logout_btn);
@@ -138,6 +149,8 @@ public class Profile extends Fragment {
                     city = algo.enc2dec(json.getString(conf.tag_city), newKey);
                     email = algo.enc2dec(json.getString(conf.tag_email), newKey);
                     phone = algo.enc2dec(json.getString(conf.tag_phone), newKey);
+                    point = Float.parseFloat(algo.enc2dec(json.getString(conf.tag_pt), newKey));
+                    pointTotal = Float.parseFloat(algo.enc2dec(json.getString(conf.tag_ptt), newKey));
                     picture = json.getString(conf.tag_picture);
                     Username_txt.setText(fname + " " + lname);
                     int[] tab = new Calculator().getAge(dateN);
@@ -145,6 +158,7 @@ public class Profile extends Fragment {
                     City_txt.setText(gender + " from " + country + ", lives in " + city);
                     Email_txt.setText(email);
                     Phone_txt.setText(phone);
+                    Point_rb.setRating((5 * point) / pointTotal);
                     byte[] imageAsBytes = Base64.decode(picture.getBytes(), Base64.DEFAULT);
                     Picture_iv.setImageBitmap(BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length));
                 }
