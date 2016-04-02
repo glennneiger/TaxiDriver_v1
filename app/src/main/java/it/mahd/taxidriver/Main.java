@@ -35,7 +35,6 @@ import it.mahd.taxidriver.util.SocketIO;
 
 public class Main extends AppCompatActivity implements FragmentDrawer.FragmentDrawerListener {
     SharedPreferences pref;
-    ServerRequest sr = new ServerRequest();
     Controllers conf = new Controllers();
     //Socket socket = SocketIO.getInstance();
 

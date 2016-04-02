@@ -43,6 +43,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -60,6 +62,7 @@ import it.mahd.taxidriver.Main;
 import it.mahd.taxidriver.R;
 import it.mahd.taxidriver.util.Controllers;
 import it.mahd.taxidriver.util.DirectionMap;
+import it.mahd.taxidriver.util.ServerRequest;
 import it.mahd.taxidriver.util.SocketIO;
 
 /**
@@ -68,6 +71,7 @@ import it.mahd.taxidriver.util.SocketIO;
 public class Book extends Fragment implements LocationListener {
     SharedPreferences pref;
     Controllers conf = new Controllers();
+    ServerRequest sr = new ServerRequest();
     Socket socket = SocketIO.getInstance();
 
     MapView mMapView;
@@ -85,14 +89,13 @@ public class Book extends Fragment implements LocationListener {
     boolean isGPSEnabled = false;// flag for GPS status
     boolean isNetworkEnabled = false;// flag for network status
     boolean canGetLocation = false;// flag for GPS status
-    private String tokenOfClient;
+    private String tokenOfClient, fnameOfClient;
     private boolean ioBook = false;
     private boolean ioValid = false;
     private boolean isClick = false;
     private boolean isRoute = false;
-    private double pcourse;
-    private double ptake;
-    private double preturn;
+    private double pcourse, ptake, preturn;
+    private double originLatitude, originLongitude, desLatitude, desLongitude;
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 3;// The minimum distance to change Updates in meters // 3 meters
     private static final long MIN_TIME_BW_UPDATES = 1000 * 3 * 1;// The minimum time between updates in milliseconds // 3 seconds
     private FloatingActionButton Start_btn, Pause_btn, Course_btn, Valid_btn;
@@ -239,36 +242,66 @@ public class Book extends Fragment implements LocationListener {
                 Send_btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if(conf.NetworkIsAvailable(getActivity())){
+                        if (conf.NetworkIsAvailable(getActivity())) {
                             if (!validatePriceCourse()) { return; }
                             if (!validatePriceTake()) { return; }
-                            if (validatePriceReturn()) {
-                                pcourse = Double.parseDouble(PriceCourse_etxt.getText().toString());
-                                ptake = Double.parseDouble(PriceTake_etxt.getText().toString());
-                                preturn = Double.parseDouble(PriceReturn_etxt.getText().toString());
-                                if (ptake >= pcourse) {
-                                    if (!(preturn == ptake - pcourse)) {
-                                        Toast.makeText(getActivity(), "plz verify u return " + (ptake - pcourse),Toast.LENGTH_LONG).show();
-                                    }
+                            if (!validatePriceReturn()) { return; }
+
+                            pcourse = Double.parseDouble(PriceCourse_etxt.getText().toString());
+                            ptake = Double.parseDouble(PriceTake_etxt.getText().toString());
+                            preturn = Double.parseDouble(PriceReturn_etxt.getText().toString());
+                            if (ptake >= pcourse) {
+                                if (!(preturn == ptake - pcourse)) {
+                                    Toast.makeText(getActivity(), "plz verify u return " + (ptake - pcourse), Toast.LENGTH_LONG).show();
+                                    return;
                                 }
                             }
-                            JSONObject json = new JSONObject();
-                            try{
-                                json.put(conf.tag_pcourse, pcourse);
-                                json.put(conf.tag_ptake, ptake);
-                                json.put(conf.tag_preturn, preturn);
-                                json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
-                                socket.emit(conf.io_endCourse, json);
-                            }catch(JSONException e){ }
-                        }else{
+
+                            List<NameValuePair> params = new ArrayList<NameValuePair>();
+                            params.add(new BasicNameValuePair(conf.tag_tokenDriver, pref.getString(conf.tag_token, "")));
+                            params.add(new BasicNameValuePair(conf.tag_username, pref.getString(conf.tag_fname, "") + " " + pref.getString(conf.tag_lname, "")));
+                            params.add(new BasicNameValuePair(conf.tag_tokenClient, tokenOfClient));
+                            params.add(new BasicNameValuePair(conf.tag_fname, fnameOfClient));
+                            params.add(new BasicNameValuePair(conf.tag_originLatitude, originLatitude + ""));
+                            params.add(new BasicNameValuePair(conf.tag_originLongitude, originLongitude + ""));
+                            params.add(new BasicNameValuePair(conf.tag_desLatitude, desLatitude + ""));
+                            params.add(new BasicNameValuePair(conf.tag_desLongitude, desLongitude + ""));
+                            params.add(new BasicNameValuePair(conf.tag_pcourse, pcourse + ""));
+                            params.add(new BasicNameValuePair(conf.tag_ptake, ptake + ""));
+                            params.add(new BasicNameValuePair(conf.tag_preturn, preturn + ""));
+                            JSONObject jsonX = sr.getJSON(conf.url_addBook, params);
+                            if(jsonX != null){
+                                try{
+                                    String jsonstr = jsonX.getString(conf.response);
+                                    Toast.makeText(getActivity(), jsonstr, Toast.LENGTH_LONG).show();
+                                    if(jsonX.getBoolean(conf.res)){
+                                        JSONObject json = new JSONObject();
+                                        try {
+                                            json.put(conf.tag_id, jsonX.getString(conf.tag_id));
+                                            json.put(conf.tag_pcourse, pcourse);
+                                            json.put(conf.tag_ptake, ptake);
+                                            json.put(conf.tag_preturn, preturn);
+                                            json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
+                                            socket.emit(conf.io_endCourse, json);
+                                            validDialog.dismiss();
+                                        } catch (JSONException e) {
+                                        }
+                                    }
+                                }catch(JSONException e){
+                                    e.printStackTrace();
+                                }
+                            }else{
+                                Toast.makeText(getActivity(),R.string.serverunvalid,Toast.LENGTH_LONG).show();
+                            }
+                        } else {
                             Toast.makeText(getActivity(), R.string.networkunvalid, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
-
                 PriceCourse_etxt.addTextChangedListener(new MyTextWatcher(PriceCourse_etxt));
                 PriceTake_etxt.addTextChangedListener(new MyTextWatcher(PriceTake_etxt));
                 PriceReturn_etxt.addTextChangedListener(new MyTextWatcher(PriceReturn_etxt));
+                validDialog.show();
             }
         });
         return v;
@@ -386,6 +419,7 @@ public class Book extends Fragment implements LocationListener {
                                 Book_btn.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
                                         bookDialog.dismiss();
+                                        fnameOfClient = fname;
                                         isClick = true;
                                         isRoute = true;
                                         isStart = false;
@@ -429,8 +463,10 @@ public class Book extends Fragment implements LocationListener {
     private String getDirectionsUrl(LatLng origin,LatLng dest){
         // Origin of route
         String str_origin = "origin="+origin.latitude+","+origin.longitude;
+        originLatitude = origin.latitude; originLongitude = origin.longitude;
         // Destination of route
         String str_dest = "destination="+dest.latitude+","+dest.longitude;
+        desLatitude = dest.latitude; desLongitude = dest.longitude;
         // Sensor enabled
         String sensor = "sensor=false";
         // Building the parameters to the web service
