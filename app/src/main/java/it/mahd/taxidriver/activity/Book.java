@@ -118,6 +118,7 @@ public class Book extends Fragment implements LocationListener {
         pref = getActivity().getSharedPreferences(conf.app, Context.MODE_PRIVATE);
         socket.connect();
         ioBook = true;
+        ioValid = false; isClick = false; isRoute = false;
         socket.on(conf.io_preBook, handleIncomingPreBook);//listen in book now
         socket.on(conf.io_validRoute, handleIncomingValidRoute);//listen in valid route
 
@@ -542,7 +543,7 @@ public class Book extends Fragment implements LocationListener {
             json.put(conf.tag_longitude, lon);
             json.put(conf.tag_token, pref.getString(conf.tag_token, ""));
             json.put(conf.tag_working, work);
-            socket.emit(conf.io_gps, json);
+            socket.emit(conf.io_searchTaxi, json);
         }catch(JSONException e){ }
     }
 
@@ -743,12 +744,18 @@ public class Book extends Fragment implements LocationListener {
     @Override
     public void onPause() {
         super.onPause();
+        sendToServer(latitude, longitude, false);
+        ioBook = false; ioValid = false; isClick = false; isRoute = false;
+        stopUsingGPS();
+        socket.disconnect();
         mMapView.onPause();
     }
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         sendToServer(latitude, longitude, false);
+        ioBook = false; ioValid = false; isClick = false; isRoute = false;
         stopUsingGPS();
         socket.disconnect();
         mMapView.onDestroy();
@@ -757,7 +764,6 @@ public class Book extends Fragment implements LocationListener {
         ft.addToBackStack(null);
         ft.commit();
         ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.home));
-        super.onDestroy();
     }
 
     @Override
