@@ -216,11 +216,11 @@ public class Book extends Fragment implements LocationListener {
         Course_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                isStart = false;
-                ioBook = false;
+                isStart = false; ioBook = false;
+                isClick = true;
                 sendToServer(0, 0, isStart);
-                if (!isClick)
-                    Toast.makeText(getActivity(), "Other service !!", Toast.LENGTH_SHORT).show();
+                /*if (!isClick)
+                    Toast.makeText(getActivity(), "Other service !!", Toast.LENGTH_SHORT).show();*/
                 googleMap.clear();
             }
         });
@@ -336,7 +336,7 @@ public class Book extends Fragment implements LocationListener {
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     if (isStart && ioBook) {
-                        ioBook = false;
+                        //ioBook = false;
                         JSONObject data = (JSONObject) args[0];
                         final Double lat, lon;
                         final String tokenD, tokenC, fname;
@@ -356,7 +356,7 @@ public class Book extends Fragment implements LocationListener {
                                 Username_txt.setText(fname);
                                 Book_btn = (Button) bookDialog.findViewById(R.id.book_btn);
                                 Cancel_btn = (Button) bookDialog.findViewById(R.id.cancel_btn);
-
+                                bookDialog.show();
                                 Cancel_btn.setOnClickListener(new View.OnClickListener() {
                                     public void onClick(View v) {
                                         bookDialog.dismiss();
@@ -368,14 +368,14 @@ public class Book extends Fragment implements LocationListener {
                                         bookDialog.dismiss();
                                         tokenOfClient = tokenC;
                                         fnameOfClient = fname;
-                                        isClick = true;
-                                        isRoute = true;
+                                        isClick = false;
                                         isStart = false;
+                                        isRoute = true;
                                         sendToServer(0, 0, isStart);
                                         googleMap.clear();
                                         MarkerOptions options = new MarkerOptions();
-                                        LatLng origin = new LatLng(latitude,longitude);
-                                        LatLng dest = new LatLng(lat,lon);
+                                        LatLng origin = new LatLng(latitude, longitude);
+                                        LatLng dest = new LatLng(lat, lon);
                                         options.position(dest);
                                         options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)).title("Me");
                                         googleMap.addMarker(options);
@@ -387,17 +387,17 @@ public class Book extends Fragment implements LocationListener {
                                         downloadTask.execute(url);
 
                                         JSONObject jsonx = new JSONObject();
-                                        try{
-                                            jsonx.put(conf.tag_latitude,latitude);
+                                        try {
+                                            jsonx.put(conf.tag_latitude, latitude);
                                             jsonx.put(conf.tag_longitude, longitude);
                                             jsonx.put(conf.tag_token, pref.getString(conf.tag_token, ""));
                                             socket.emit(conf.io_validBook, jsonx);
                                             ioValid = true;
                                             isStart = false;
-                                        }catch(JSONException e){ }
+                                        } catch (JSONException e) {
+                                        }
                                     }
                                 });
-                                bookDialog.show();
                             }
                         } catch (JSONException e) { }
                     } else {

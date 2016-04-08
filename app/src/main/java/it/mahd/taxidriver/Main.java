@@ -19,10 +19,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.github.nkzawa.socketio.client.Socket;
-
 import it.mahd.taxidriver.activity.Book;
-import it.mahd.taxidriver.activity.BookAdvance;
+import it.mahd.taxidriver.activity.Taxi;
 import it.mahd.taxidriver.activity.Home;
 import it.mahd.taxidriver.activity.Login;
 import it.mahd.taxidriver.activity.Profile;
@@ -30,8 +28,6 @@ import it.mahd.taxidriver.activity.Reclamation;
 import it.mahd.taxidriver.activity.Settings;
 import it.mahd.taxidriver.model.FragmentDrawer;
 import it.mahd.taxidriver.util.Controllers;
-import it.mahd.taxidriver.util.ServerRequest;
-import it.mahd.taxidriver.util.SocketIO;
 
 public class Main extends AppCompatActivity implements FragmentDrawer.FragmentDrawerListener {
     SharedPreferences pref;
@@ -105,8 +101,8 @@ public class Main extends AppCompatActivity implements FragmentDrawer.FragmentDr
                 title = getString(R.string.now);
                 break;
             case 2:
-                fragment = new BookAdvance();
-                title = getString(R.string.advance);
+                fragment = new Taxi();
+                title = getString(R.string.taxi);
                 break;
             case 3:
                 fragment = new Reclamation();
@@ -144,18 +140,6 @@ public class Main extends AppCompatActivity implements FragmentDrawer.FragmentDr
                     getSupportActionBar().setTitle(title);
                 }
             }else{
-                if(title.equals(getString(R.string.advance))){
-                    FragmentManager fragmentManager = getSupportFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    Bundle args = new Bundle();
-                    args.putDouble(conf.tag_latitude, 0);
-                    args.putDouble(conf.tag_longitude, 0);
-                    fragment.setArguments(args);
-                    fragmentTransaction.replace(R.id.container_body, fragment);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
-                    getSupportActionBar().setTitle(title);
-                }
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.container_body, fragment);

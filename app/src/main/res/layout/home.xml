@@ -13,9 +13,9 @@
 
     <Button
         style="@style/DashButton"
-        android:id="@+id/btn_advance"
+        android:id="@+id/btn_taxi"
         android:drawableTop="@mipmap/ic_launcher"
-        android:text="@string/advance" />
+        android:text="@string/taxi" />
 
     <Button
         style="@style/DashButton"

@@ -43,13 +43,7 @@ public class Home extends Fragment {
         Now_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //return commantre annd delete this
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.replace(R.id.container_body, new Book());
-                ft.addToBackStack(null);
-                ft.commit();
-                ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.now));
-                /*if (pref.getString(Tag_token, "").equals("")){
+                if (pref.getString(conf.tag_token, "").equals("")){
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
                     ft.replace(R.id.container_body, new Login());
                     ft.addToBackStack(null);
@@ -61,12 +55,12 @@ public class Home extends Fragment {
                     ft.addToBackStack(null);
                     ft.commit();
                     ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.now));
-                }*/
+                }
             }
         });
 
-        Button Advance_btn = (Button) rootView.findViewById(R.id.btn_advance);
-        Advance_btn.setOnClickListener(new View.OnClickListener() {
+        Button Taxi_btn = (Button) rootView.findViewById(R.id.btn_taxi);
+        Taxi_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (pref.getString(conf.tag_token, "").equals("")){
@@ -75,16 +69,11 @@ public class Home extends Fragment {
                     ft.commit();
                     ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.login));
                 }else{
-                    Fragment fr = new BookAdvance();
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
-                    Bundle args = new Bundle();
-                    args.putDouble(conf.tag_latitude, 0);
-                    args.putDouble(conf.tag_longitude, 0);
-                    fr.setArguments(args);
-                    ft.replace(R.id.container_body, fr);
+                    ft.replace(R.id.container_body, new Taxi());
                     ft.addToBackStack(null);
                     ft.commit();
-                    ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.advance));
+                    ((Main) getActivity()).getSupportActionBar().setTitle(getString(R.string.taxi));
                 }
             }
         });

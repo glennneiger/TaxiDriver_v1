@@ -2,8 +2,9 @@
     <string name="app_name">Taxi Driver</string>
 
     <string name="home">Home</string>
-    <string name="now">Book now</string>
-    <string name="advance">Book in advance</string>
+    <string name="now">Book</string>
+    <string name="taxi">Taxi</string>
+    <string name="taxi_search">Search Taxi</string>
     <string name="reclamation">Reclamation</string>
     <string name="reclamation_new">New Reclamation</string>
     <string name="profile">Profile</string>
@@ -54,11 +55,13 @@
     <string name="priceTake_err">Enter the amount taked</string>
     <string name="priceReturn">The amount returned</string>
     <string name="priceReturn_err">Enter the amount returned</string>
+    <string name="serial">Serial</string>
+    <string name="search">Search</string>
 
     <string-array name="nav_drawer_labels">
         <item>@string/home</item>
         <item>@string/now</item>
-        <item>@string/advance</item>
+        <item>@string/taxi</item>
         <item>@string/reclamation</item>
         <item>@string/profile</item>
     </string-array>

@@ -15,13 +15,16 @@ public class Controllers {
     public static final String url_addMessage = url + "/addMessage";
     public static final String url_getMessage = url + "/getAllMessage";
     public static final String url_addBook = url + "/addBook";
-    public static final String url_addBookAdvance = url + "/addBookAdvance";
     public static final String url_login = url + "/login";
     public static final String url_profile = url + "/profile";
     public static final String url_logout = url + "/logout";
     public static final String url_getAllCountry = url + "/getAllCountry";
     public static final String url_getAllCity = url + "/getAllCity";
     public static final String url_signup = url + "/signup";
+    public static final String url_getTaxiDriving = url + "/getTaxiDriving";
+    public static final String url_searchTaxi = url + "/searchTaxi";
+    public static final String url_addTaxiToDriver = url + "/addTaxiToDriver";
+
 
     public static final String app = "AppTaxiDriver";
     public static final String res = "res";
@@ -71,6 +74,12 @@ public class Controllers {
     public static final String tag_pcourse = "pcourse";
     public static final String tag_ptake = "ptake";
     public static final String tag_preturn = "preturn";
+    public static final String tag_mark = "mark";
+    public static final String tag_model = "model";
+    public static final String tag_serial = "serial";
+    public static final String tag_places = "places";
+    public static final String tag_luggages = "luggages";
+    public static final String tag_color = "color";
 
     public static final String tag_socket = "socket";
     public static final String io_searchTaxi = "searchTaxi";
